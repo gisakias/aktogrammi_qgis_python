@@ -1,0 +1,63 @@
+from osgeo import gdal
+import numpy as np
+
+# Path to the DEM raster file
+dem_path = "C:\\Users\\Elassonas\\Downloads\\ΕΦΑΣΓΠ\\efasgpdata\\dem.tif"
+
+# Open the DEM raster
+dem_dataset = gdal.Open(dem_path, gdal.GA_ReadOnly)
+if dem_dataset is None:
+    print("Error: Unable to open DEM raster file")
+    exit()
+
+# Read the DEM raster as a numpy array
+dem_array = dem_dataset.ReadAsArray()
+
+# Get raster dimensions
+rows, cols = dem_array.shape
+
+# Create a new array for the boundary raster
+boundary_array = np.copy(dem_array)
+
+# Define the value to assign to boundary pixels
+boundary_value = -1
+
+# Iterate through each pixel in the DEM array
+for row in range(rows):
+    for col in range(cols):
+        # Check if the current pixel is nodata
+        if dem_array[row, col] == dem_dataset.GetRasterBand(1).GetNoDataValue():
+            continue  # Skip nodata pixels
+        # Check if the current pixel is on the edge
+        if (row == 0 or row == rows - 1 or col == 0 or col == cols - 1):
+            # Set the current pixel to the boundary value
+            boundary_array[row, col] = boundary_value
+        else:
+            # Check if any neighboring pixel is nodata
+            is_edge_pixel = False
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    if dem_array[row + i, col + j] == dem_dataset.GetRasterBand(1).GetNoDataValue():
+                        is_edge_pixel = True
+                        break
+                if is_edge_pixel:
+                    break
+            if is_edge_pixel:
+                # Set the current pixel to the boundary value
+                boundary_array[row, col] = boundary_value
+
+# Create a new raster with the boundary array
+output_path = "C:\\Users\\Elassonas\\Downloads\\ΕΦΑΣΓΠ\\efasgpdata\\demnewpixels.tif"
+driver = gdal.GetDriverByName("GTiff")
+output_dataset = driver.Create(output_path, cols, rows, 1, gdal.GDT_Float32)
+output_dataset.SetGeoTransform(dem_dataset.GetGeoTransform())
+output_dataset.SetProjection(dem_dataset.GetProjection())
+output_band = output_dataset.GetRasterBand(1)
+output_band.WriteArray(boundary_array)
+
+# Close the datasets
+output_band = None
+output_dataset = None
+dem_dataset = None
+
+print("Boundary raster created and saved to:", output_path)
