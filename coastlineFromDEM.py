@@ -1,7 +1,7 @@
 from osgeo import gdal
 import numpy as np
 
-dem_path = "C:\\Users\\Elassonas\\Desktop\\ΕΦΑΣΓΠ\\efasgpdata\\dem.tif"
+dem_path = "pathtodem\\dem.tif"
 dem_dataset = gdal.Open(dem_path, gdal.GA_ReadOnly)
 if dem_dataset is None:
     print("Error: Unable to open DEM raster file")
@@ -27,7 +27,7 @@ for row in range(rows):
                     break
             if is_edge_pixel:
                 boundary_array[row, col] = boundary_value
-output_path = "C:\\Users\\Elassonas\\Desktop\\ΕΦΑΣΓΠ\\efasgpdata\\dem2aktogrammi.tif"
+output_path = "outputpath\\aktogrammi.tif"
 driver = gdal.GetDriverByName("GTiff")
 output_dataset = driver.Create(output_path, cols, rows, 1, gdal.GDT_Float32)
 output_dataset.SetGeoTransform(dem_dataset.GetGeoTransform())
