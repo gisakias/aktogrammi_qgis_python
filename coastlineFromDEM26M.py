@@ -3,7 +3,7 @@ from osgeo import gdal
 import numpy as np
 
 # Path to the DEM raster file
-dem_path = "M:\\final\\demhellas\\srtm2100clipped.tif"
+dem_path = "pathtodem\\srtm2100clipped.tif"
 
 # Open the DEM raster
 dem_dataset = gdal.Open(dem_path, gdal.GA_ReadOnly)
@@ -37,7 +37,7 @@ for row in range(1, rows - 1):
             boundary_array[row, col] = boundary_value
 
 # Create a new raster with the boundary array
-output_path = "M:\\final\\coastline\\akto.tif"
+output_path = "outputpath\\akto.tif"
 driver = gdal.GetDriverByName("GTiff")
 output_dataset = driver.Create(output_path, cols, rows, 1, gdal.GDT_Float32)
 output_dataset.SetGeoTransform(dem_dataset.GetGeoTransform())
